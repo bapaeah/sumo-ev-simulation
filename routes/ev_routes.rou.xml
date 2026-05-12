@@ -36,11 +36,15 @@
     
     <!-- Pedestrians -->
     <personFlow id="pedestrian_flow" begin="0" end="600" number="15" type="DEFAULT_PEDTYPE">
-        <walk edges="marathalli_ped_in marathalli marathalli_ped_out" />
+        <walk edges="marathalli_ped_in marathalli_ped_out" />
     </personFlow>
     
     <personFlow id="pedestrian_flow2" begin="0" end="600" number="12" type="DEFAULT_PEDTYPE">
-        <walk edges="whitefield_ped_in whitefield whitefield_ped_out" />
+        <walk edges="whitefield_ped_in whitefield_ped_out" />
+    </personFlow>
+    
+    <personFlow id="pedestrian_flow3" begin="0" end="600" number="10" type="DEFAULT_PEDTYPE">
+        <walk edges="silk_ped_in silk_ped_out" />
     </personFlow>
     
     <!-- EV 1: 40 kWh battery, 80% SOC (32 kWh) -->
