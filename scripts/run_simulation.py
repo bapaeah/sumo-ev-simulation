@@ -3,13 +3,17 @@
 SUMO EV Simulation: Marathalli to ETV Route
 Simulates 5 electric vehicles with different battery capacities
 Tracks State of Charge (SOC) and Velocity in real-time
-Captures screenshots of the simulation
+Captures colored screenshots with vehicle positions and status
 """
 
 import os
 import sys
 import csv
 import subprocess
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+from matplotlib.patches import FancyBboxPatch, Circle, Polygon
+import numpy as np
 from datetime import datetime
 from pathlib import Path
 
@@ -32,15 +36,19 @@ SCREENSHOT_INTERVAL = 30  # Take screenshot every 30 seconds
 
 # EV Specifications
 EV_SPECS = {
-    'ev_01': {'capacity': 40, 'initial_soc': 80},
-    'ev_02': {'capacity': 60, 'initial_soc': 85},
-    'ev_03': {'capacity': 75, 'initial_soc': 90},
-    'ev_04': {'capacity': 50, 'initial_soc': 70},
-    'ev_05': {'capacity': 55, 'initial_soc': 75}
+    'ev_01': {'capacity': 40, 'initial_soc': 80, 'color': '#FF6B6B'},    # Red
+    'ev_02': {'capacity': 60, 'initial_soc': 85, 'color': '#4ECDC4'},    # Teal
+    'ev_03': {'capacity': 75, 'initial_soc': 90, 'color': '#45B7D1'},    # Blue
+    'ev_04': {'capacity': 50, 'initial_soc': 70, 'color': '#FFA07A'},    # Light Salmon
+    'ev_05': {'capacity': 55, 'initial_soc': 75, 'color': '#98D8C8'}     # Mint
 }
 
 # Consumption rate (kWh per km)
 CONSUMPTION_RATE = 0.15
+
+# Network bounds
+NETWORK_X_MIN, NETWORK_X_MAX = 0, 12000
+NETWORK_Y_MIN, NETWORK_Y_MAX = 0, 5000
 
 
 class EVSimulation:
@@ -54,6 +62,7 @@ class EVSimulation:
                        for ev_id, specs in EV_SPECS.items()}
         self.timestep = 0
         self.screenshot_count = 0
+        self.vehicle_positions = {}  # Store vehicle positions for visualization
         
     def create_output_directory(self):
         """Create output directory if it doesn't exist"""
@@ -178,21 +187,154 @@ class EVSimulation:
                     f"{self.ev_data[ev_id]['energy_consumed']:.2f}"
                 ])
     
-    def capture_screenshot(self):
-        """Capture screenshot of the SUMO simulation"""
+    def draw_car_symbol(self, ax, x, y, angle, color, label):
+        """Draw a car symbol at position (x, y) with given angle and color"""
+        # Car body dimensions
+        car_length = 150
+        car_width = 80
+        
+        # Convert angle to radians (SUMO uses degrees)
+        angle_rad = np.radians(angle)
+        
+        # Car body (rectangle)
+        car_body = FancyBboxPatch(
+            (x - car_length/2, y - car_width/2),
+            car_length,
+            car_width,
+            boxstyle="round,pad=15",
+            angle=angle,
+            facecolor=color,
+            edgecolor='black',
+            linewidth=2,
+            alpha=0.8
+        )
+        ax.add_patch(car_body)
+        
+        # Draw direction arrow
+        arrow_length = 200
+        arrow_x = x + arrow_length * np.cos(angle_rad)
+        arrow_y = y + arrow_length * np.sin(angle_rad)
+        ax.arrow(x, y, arrow_x - x, arrow_y - y, 
+                head_width=40, head_length=50, fc='darkgray', ec='black', alpha=0.5)
+        
+        # Add label
+        ax.text(x, y - car_width/2 - 100, label, 
+               ha='center', va='top', fontsize=9, fontweight='bold',
+               bbox=dict(boxstyle='round', facecolor=color, alpha=0.7))
+    
+    def capture_colored_screenshot(self, vehicles):
+        """Capture colored screenshot with vehicle positions and status"""
         try:
             time_formatted = self.format_time(self.timestep)
             filename = f"simulation_t{self.timestep:04d}_{time_formatted.replace(':', '-')}.png"
             filepath = os.path.join(self.screenshot_dir, filename)
             
-            # Use SUMO's screenshot command via TraCI
-            traci.gui.screenshot('View #0', filepath)
+            # Create figure with high DPI for better quality
+            fig, ax = plt.subplots(figsize=(16, 7), dpi=100)
+            
+            # Set network bounds
+            ax.set_xlim(NETWORK_X_MIN - 500, NETWORK_X_MAX + 500)
+            ax.set_ylim(NETWORK_Y_MIN - 500, NETWORK_Y_MAX + 500)
+            ax.set_aspect('equal')
+            
+            # Draw road network
+            self.draw_road_network(ax)
+            
+            # Draw vehicles
+            for ev_id, data in vehicles.items():
+                if ev_id in EV_SPECS:
+                    speed_kmh = data['speed'] * 3.6
+                    soc = self.ev_data[ev_id]['soc']
+                    remaining_energy = (soc / 100) * EV_SPECS[ev_id]['capacity']
+                    
+                    # Get vehicle angle
+                    angle = data.get('angle', 0)
+                    
+                    # Draw car
+                    self.draw_car_symbol(
+                        ax, data['x'], data['y'], angle,
+                        EV_SPECS[ev_id]['color'],
+                        f"{ev_id}\n{soc:.1f}%\n{speed_kmh:.1f}km/h"
+                    )
+            
+            # Add title and info
+            title = f"SUMO EV Simulation - Marathalli to ETV Route\nTimestamp: {self.timestep}s ({time_formatted})"
+            ax.set_title(title, fontsize=16, fontweight='bold', pad=20)
+            
+            # Add grid
+            ax.grid(True, alpha=0.3, linestyle='--')
+            
+            # Add legend
+            legend_text = "EV Status Legend:\n"
+            legend_text += "🟢 HEALTHY (SOC > 50%)\n"
+            legend_text += "🟡 WARNING (20% < SOC ≤ 50%)\n"
+            legend_text += "🔴 CRITICAL (SOC ≤ 20%)"
+            
+            ax.text(0.02, 0.98, legend_text, transform=ax.transAxes,
+                   fontsize=10, verticalalignment='top',
+                   bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+            
+            # Add axis labels
+            ax.set_xlabel('X Coordinate (meters)', fontsize=12)
+            ax.set_ylabel('Y Coordinate (meters)', fontsize=12)
+            
+            # Add vehicle info box
+            info_text = "Current Vehicles:\n"
+            for ev_id, data in vehicles.items():
+                if ev_id in EV_SPECS:
+                    soc = self.ev_data[ev_id]['soc']
+                    speed_kmh = data['speed'] * 3.6
+                    info_text += f"{ev_id}: {soc:.1f}% SOC, {speed_kmh:.1f} km/h\n"
+            
+            ax.text(0.98, 0.98, info_text, transform=ax.transAxes,
+                   fontsize=9, verticalalignment='top', horizontalalignment='right',
+                   bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8))
+            
+            # Tight layout and save
+            plt.tight_layout()
+            plt.savefig(filepath, dpi=100, bbox_inches='tight')
+            plt.close(fig)
             
             self.screenshot_count += 1
             print(f"  [SCREENSHOT] Captured: {filename}")
             
         except Exception as e:
             print(f"  [WARNING] Could not capture screenshot: {e}")
+    
+    def draw_road_network(self, ax):
+        """Draw the road network on the plot"""
+        # Define road edges
+        roads = [
+            # Main route
+            {'start': (0, 0), 'end': (5000, 1500), 'name': 'Marathalli→Whitefield', 'color': '#E8E8E8'},
+            {'start': (5000, 1500), 'end': (8500, 3200), 'name': 'Whitefield→Silk Board', 'color': '#E8E8E8'},
+            {'start': (8500, 3200), 'end': (11000, 4500), 'name': 'Silk Board→ETV', 'color': '#E8E8E8'},
+            # Return route
+            {'start': (11000, 4500), 'end': (8500, 3200), 'name': 'ETV→Silk Board', 'color': '#F0F0F0'},
+            {'start': (8500, 3200), 'end': (5000, 1500), 'name': 'Silk Board→Whitefield', 'color': '#F0F0F0'},
+            {'start': (5000, 1500), 'end': (0, 0), 'name': 'Whitefield→Marathalli', 'color': '#F0F0F0'},
+        ]
+        
+        # Draw roads
+        for road in roads:
+            x_coords = [road['start'][0], road['end'][0]]
+            y_coords = [road['start'][1], road['end'][1]]
+            ax.plot(x_coords, y_coords, color='#666666', linewidth=3, zorder=1)
+            ax.fill_between(x_coords, y_coords, color=road['color'], alpha=0.5, zorder=0)
+        
+        # Draw junctions as circles
+        junctions = [
+            {'pos': (0, 0), 'name': 'Marathalli'},
+            {'pos': (5000, 1500), 'name': 'Whitefield'},
+            {'pos': (8500, 3200), 'name': 'Silk Board'},
+            {'pos': (11000, 4500), 'name': 'ETV'},
+        ]
+        
+        for junction in junctions:
+            circle = Circle(junction['pos'], 150, color='#FFD700', ec='black', linewidth=2, zorder=3)
+            ax.add_patch(circle)
+            ax.text(junction['pos'][0], junction['pos'][1], junction['name'],
+                   ha='center', va='center', fontsize=8, fontweight='bold')
     
     def print_console_output(self, vehicles):
         """Print real-time console output"""
@@ -232,9 +374,9 @@ class EVSimulation:
         print("="*120 + "\n")
         
         try:
-            # Start SUMO simulation with GUI for screenshots
-            sumo_cmd = ['sumo-gui', '-c', SUMO_CONFIG, '--step-length', '1.0', 
-                       '--no-step-log', '--xml-validation', 'never', '--start']
+            # Start SUMO simulation (headless for screenshot capture)
+            sumo_cmd = ['sumo', '-c', SUMO_CONFIG, '--step-length', '1.0', 
+                       '--no-step-log', '--xml-validation', 'never', '--no-warnings']
             
             traci.start(sumo_cmd)
             print("[INFO] SUMO simulation started successfully\n")
@@ -252,6 +394,7 @@ class EVSimulation:
                         try:
                             speed = traci.vehicle.getSpeed(vehicle_id)
                             x, y = traci.vehicle.getPosition(vehicle_id)
+                            angle = traci.vehicle.getAngle(vehicle_id)
                             
                             # Update SOC
                             soc, distance, energy = self.update_soc(vehicle_id, speed, dt=1.0)
@@ -259,7 +402,8 @@ class EVSimulation:
                             vehicles[vehicle_id] = {
                                 'speed': speed,
                                 'x': x,
-                                'y': y
+                                'y': y,
+                                'angle': angle
                             }
                         except traci.TraCIException:
                             continue
@@ -274,16 +418,16 @@ class EVSimulation:
                     if self.timestep % 10 == 0:
                         self.print_console_output(vehicles)
                     
-                    # Capture screenshot at specified interval
+                    # Capture colored screenshot at specified interval
                     if self.timestep % SCREENSHOT_INTERVAL == 0 and self.timestep > 0:
-                        self.capture_screenshot()
+                        self.capture_colored_screenshot(vehicles)
                 
                 # Perform step
                 traci.simulationStep()
             
-            # Final output
+            # Final output and screenshot
             self.print_console_output(vehicles)
-            self.capture_screenshot()  # Final screenshot
+            self.capture_colored_screenshot(vehicles)
             
             print("\n" + "="*120)
             print("[SUCCESS] Simulation completed successfully!")
