@@ -36,46 +36,46 @@
     
     <!-- Pedestrians -->
     <personFlow id="pedestrian_flow" begin="0" end="600" number="15" type="DEFAULT_PEDTYPE">
-        <walk edges="marathalli_ped marathalli whitefield_ped" />
+        <walk edges="marathalli_ped_in marathalli marathalli_ped_out" />
     </personFlow>
     
     <personFlow id="pedestrian_flow2" begin="0" end="600" number="12" type="DEFAULT_PEDTYPE">
-        <walk edges="whitefield_ped whitefield silk_ped" />
+        <walk edges="whitefield_ped_in whitefield whitefield_ped_out" />
     </personFlow>
     
     <!-- EV 1: 40 kWh battery, 80% SOC (32 kWh) -->
     <vehicle id="ev_01" type="ev_40kwh" depart="0" departPos="0" departSpeed="max">
-        <route edges="marathalli_etv_main whitefield_silk silk_etv etv_silk silk_whitefield whitefield_marathalli" />
+        <route edges="marathalli_whitefield whitefield_silk silk_etv etv_silk silk_whitefield whitefield_marathalli" />
         <param key="initialSOC" value="80" />
     </vehicle>
     
     <!-- EV 2: 60 kWh battery, 85% SOC (51 kWh) -->
     <vehicle id="ev_02" type="ev_60kwh" depart="2" departPos="0" departSpeed="max">
-        <route edges="marathalli_etv_main whitefield_silk silk_etv etv_silk silk_whitefield whitefield_marathalli" />
+        <route edges="marathalli_whitefield whitefield_silk silk_etv etv_silk silk_whitefield whitefield_marathalli" />
         <param key="initialSOC" value="85" />
     </vehicle>
     
     <!-- EV 3: 75 kWh battery, 90% SOC (67.5 kWh) -->
     <vehicle id="ev_03" type="ev_75kwh" depart="4" departPos="0" departSpeed="max">
-        <route edges="marathalli_etv_main whitefield_silk silk_etv etv_silk silk_whitefield whitefield_marathalli" />
+        <route edges="marathalli_whitefield whitefield_silk silk_etv etv_silk silk_whitefield whitefield_marathalli" />
         <param key="initialSOC" value="90" />
     </vehicle>
     
     <!-- EV 4: 50 kWh battery, 70% SOC (35 kWh) -->
     <vehicle id="ev_04" type="ev_50kwh" depart="6" departPos="0" departSpeed="max">
-        <route edges="marathalli_etv_main whitefield_silk silk_etv etv_silk silk_whitefield whitefield_marathalli" />
+        <route edges="marathalli_whitefield whitefield_silk silk_etv etv_silk silk_whitefield whitefield_marathalli" />
         <param key="initialSOC" value="70" />
     </vehicle>
     
     <!-- EV 5: 55 kWh battery, 75% SOC (41.25 kWh) -->
     <vehicle id="ev_05" type="ev_55kwh" depart="8" departPos="0" departSpeed="max">
-        <route edges="marathalli_etv_main whitefield_silk silk_etv etv_silk silk_whitefield whitefield_marathalli" />
+        <route edges="marathalli_whitefield whitefield_silk silk_etv etv_silk silk_whitefield whitefield_marathalli" />
         <param key="initialSOC" value="75" />
     </vehicle>
     
     <!-- Traffic vehicles to create congestion -->
     <flow id="traffic_flow_1" type="traffic_car" begin="0" end="600" vehsPerHour="600" departPos="random">
-        <route edges="marathalli_etv_main whitefield_silk silk_etv" />
+        <route edges="marathalli_whitefield whitefield_silk silk_etv" />
     </flow>
     
     <flow id="traffic_flow_2" type="traffic_car" begin="0" end="600" vehsPerHour="500" departPos="random">
@@ -83,6 +83,6 @@
     </flow>
     
     <flow id="traffic_flow_3" type="traffic_car" begin="0" end="600" vehsPerHour="400" departPos="random">
-        <route edges="marathalli_etv_main whitefield_silk silk_etv" />
+        <route edges="marathalli_whitefield whitefield_silk silk_etv" />
     </flow>
 </routes>

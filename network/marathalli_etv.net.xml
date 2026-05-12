@@ -1,103 +1,103 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<net version="1.16" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
-    <location netOffset="0.00,0.00" projParameter="!"/>
+<net version="1.16" junctionCornerDetail="5" limitTurnSpeed="5.50" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+    <location netOffset="0.00,0.00" convBoundary="0.00,0.00,15000.00,5000.00" origBoundary="-10000000000.00,-10000000000.00,10000000000.00,10000000000.00" projParameter="!" />
     
-    <!-- Main highway from Marathalli to ETV -->
-    <edge id="marathalli_to_whitefield" from="marathalli" to="whitefield" priority="10" numLanes="3" speed="15.0" length="5176.38">
-        <lane id="marathalli_to_whitefield_0" index="0" speed="15.0" length="5176.38" shape="-2.50,1.44 5000.80,1503.31"/>
-        <lane id="marathalli_to_whitefield_1" index="1" speed="15.0" length="5176.38" shape="0.00,0.00 5000.00,1500.00"/>
-        <lane id="marathalli_to_whitefield_2" index="2" speed="15.0" length="5176.38" shape="2.50,-1.44 4999.20,1496.69"/>
+    <!-- Main edges (Marathalli -> Whitefield -> Silk Board -> ETV) -->
+    <edge id="marathalli_whitefield" from="marathalli" to="whitefield" priority="10" type="highway" shape="0.00,0.00 5000.00,1500.00">
+        <lane id="marathalli_whitefield_0" index="0" speed="15.00" length="5176.38" shape="-2.50,1.44 5000.80,1503.31" />
+        <lane id="marathalli_whitefield_1" index="1" speed="15.00" length="5176.38" shape="0.00,0.00 5000.00,1500.00" />
+        <lane id="marathalli_whitefield_2" index="2" speed="15.00" length="5176.38" shape="2.50,-1.44 4999.20,1496.69" />
     </edge>
     
-    <edge id="whitefield_to_silk" from="whitefield" to="silk_board" priority="10" numLanes="3" speed="12.0" length="3632.31">
-        <lane id="whitefield_to_silk_0" index="0" speed="12.0" length="3632.31" shape="5002.72,1504.45 8502.24,3202.81"/>
-        <lane id="whitefield_to_silk_1" index="1" speed="12.0" length="3632.31" shape="5000.00,1500.00 8500.00,3200.00"/>
-        <lane id="whitefield_to_silk_2" index="2" speed="12.0" length="3632.31" shape="4997.28,1495.55 8497.76,3197.19"/>
+    <edge id="whitefield_silk" from="whitefield" to="silk_board" priority="10" type="highway" shape="5000.00,1500.00 8500.00,3200.00">
+        <lane id="whitefield_silk_0" index="0" speed="12.00" length="3632.31" shape="5002.72,1504.45 8502.24,3202.81" />
+        <lane id="whitefield_silk_1" index="1" speed="12.00" length="3632.31" shape="5000.00,1500.00 8500.00,3200.00" />
+        <lane id="whitefield_silk_2" index="2" speed="12.00" length="3632.31" shape="4997.28,1495.55 8497.76,3197.19" />
     </edge>
     
-    <edge id="silk_to_etv" from="silk_board" to="etv" priority="10" numLanes="3" speed="10.0" length="2768.36">
-        <lane id="silk_to_etv_0" index="0" speed="10.0" length="2768.36" shape="8502.17,3202.67 11001.80,4502.30"/>
-        <lane id="silk_to_etv_1" index="1" speed="10.0" length="2768.36" shape="8500.00,3200.00 11000.00,4500.00"/>
-        <lane id="silk_to_etv_2" index="2" speed="10.0" length="2768.36" shape="8497.83,3197.33 10998.20,4497.70"/>
+    <edge id="silk_etv" from="silk_board" to="etv_junction" priority="10" type="highway" shape="8500.00,3200.00 11000.00,4500.00">
+        <lane id="silk_etv_0" index="0" speed="10.00" length="2768.36" shape="8502.17,3202.67 11001.80,4502.30" />
+        <lane id="silk_etv_1" index="1" speed="10.00" length="2768.36" shape="8500.00,3200.00 11000.00,4500.00" />
+        <lane id="silk_etv_2" index="2" speed="10.00" length="2768.36" shape="8497.83,3197.33 10998.20,4497.70" />
     </edge>
     
-    <!-- Return edges -->
-    <edge id="etv_to_silk" from="etv" to="silk_board" priority="10" numLanes="3" speed="10.0" length="2768.36">
-        <lane id="etv_to_silk_0" index="0" speed="10.0" length="2768.36" shape="10997.83,4497.33 8498.20,3197.70"/>
-        <lane id="etv_to_silk_1" index="1" speed="10.0" length="2768.36" shape="11000.00,4500.00 8500.00,3200.00"/>
-        <lane id="etv_to_silk_2" index="2" speed="10.0" length="2768.36" shape="11002.17,4502.67 8501.80,3202.30"/>
+    <!-- Return edges (ETV -> Silk Board -> Whitefield -> Marathalli) -->
+    <edge id="etv_silk" from="etv_junction" to="silk_board" priority="10" type="highway" shape="11000.00,4500.00 8500.00,3200.00">
+        <lane id="etv_silk_0" index="0" speed="10.00" length="2768.36" shape="10997.83,4497.33 8498.20,3197.70" />
+        <lane id="etv_silk_1" index="1" speed="10.00" length="2768.36" shape="11000.00,4500.00 8500.00,3200.00" />
+        <lane id="etv_silk_2" index="2" speed="10.00" length="2768.36" shape="11002.17,4502.67 8501.80,3202.30" />
     </edge>
     
-    <edge id="silk_to_whitefield" from="silk_board" to="whitefield" priority="10" numLanes="3" speed="12.0" length="3632.31">
-        <lane id="silk_to_whitefield_0" index="0" speed="12.0" length="3632.31" shape="8497.28,3195.55 4997.76,1497.19"/>
-        <lane id="silk_to_whitefield_1" index="1" speed="12.0" length="3632.31" shape="8500.00,3200.00 5000.00,1500.00"/>
-        <lane id="silk_to_whitefield_2" index="2" speed="12.0" length="3632.31" shape="8502.72,3204.45 5002.24,1502.81"/>
+    <edge id="silk_whitefield" from="silk_board" to="whitefield" priority="10" type="highway" shape="8500.00,3200.00 5000.00,1500.00">
+        <lane id="silk_whitefield_0" index="0" speed="12.00" length="3632.31" shape="8497.28,3195.55 4997.76,1497.19" />
+        <lane id="silk_whitefield_1" index="1" speed="12.00" length="3632.31" shape="8500.00,3200.00 5000.00,1500.00" />
+        <lane id="silk_whitefield_2" index="2" speed="12.00" length="3632.31" shape="8502.72,3204.45 5002.24,1502.81" />
     </edge>
     
-    <edge id="whitefield_to_marathalli" from="whitefield" to="marathalli" priority="10" numLanes="3" speed="15.0" length="5176.38">
-        <lane id="whitefield_to_marathalli_0" index="0" speed="15.0" length="5176.38" shape="4997.50,1498.56 -0.80,1496.69"/>
-        <lane id="whitefield_to_marathalli_1" index="1" speed="15.0" length="5176.38" shape="5000.00,1500.00 0.00,0.00"/>
-        <lane id="whitefield_to_marathalli_2" index="2" speed="15.0" length="5176.38" shape="5002.50,1501.44 0.80,1503.31"/>
+    <edge id="whitefield_marathalli" from="whitefield" to="marathalli" priority="10" type="highway" shape="5000.00,1500.00 0.00,0.00">
+        <lane id="whitefield_marathalli_0" index="0" speed="15.00" length="5176.38" shape="4997.50,1498.56 -0.80,-1.44" />
+        <lane id="whitefield_marathalli_1" index="1" speed="15.00" length="5176.38" shape="5000.00,1500.00 0.00,0.00" />
+        <lane id="whitefield_marathalli_2" index="2" speed="15.00" length="5176.38" shape="5002.50,1501.44 0.80,1.44" />
     </edge>
     
     <!-- Pedestrian paths -->
-    <edge id="marathalli_ped" from="marathalli_ped_start" to="marathalli" priority="-1" type="pedestrian" allow="pedestrian" width="2.0">
-        <lane id="marathalli_ped_0" index="0" speed="1.4" length="100.0" width="2.0" shape="-100.0,-50.0 0.0,0.0"/>
+    <edge id="marathalli_ped_in" from="marathalli_ped" to="marathalli" priority="-1" type="pedestrian">
+        <lane id="marathalli_ped_in_0" index="0" speed="1.4" length="100.0" width="2.0" shape="-100.0,-50.0 0.0,0.0" />
     </edge>
     
-    <edge id="marathalli_ped_return" from="marathalli" to="marathalli_ped_start" priority="-1" type="pedestrian" allow="pedestrian" width="2.0">
-        <lane id="marathalli_ped_return_0" index="0" speed="1.4" length="100.0" width="2.0" shape="0.0,0.0 -100.0,-50.0"/>
+    <edge id="marathalli_ped_out" from="marathalli" to="marathalli_ped" priority="-1" type="pedestrian">
+        <lane id="marathalli_ped_out_0" index="0" speed="1.4" length="100.0" width="2.0" shape="0.0,0.0 -100.0,-50.0" />
     </edge>
     
-    <edge id="whitefield_ped" from="whitefield_ped_start" to="whitefield" priority="-1" type="pedestrian" allow="pedestrian" width="2.0">
-        <lane id="whitefield_ped_0" index="0" speed="1.4" length="100.0" width="2.0" shape="5000.0,1400.0 5000.0,1500.0"/>
+    <edge id="whitefield_ped_in" from="whitefield_ped" to="whitefield" priority="-1" type="pedestrian">
+        <lane id="whitefield_ped_in_0" index="0" speed="1.4" length="100.0" width="2.0" shape="5000.0,1400.0 5000.0,1500.0" />
     </edge>
     
-    <edge id="whitefield_ped_return" from="whitefield" to="whitefield_ped_start" priority="-1" type="pedestrian" allow="pedestrian" width="2.0">
-        <lane id="whitefield_ped_return_0" index="0" speed="1.4" length="100.0" width="2.0" shape="5000.0,1500.0 5000.0,1400.0"/>
+    <edge id="whitefield_ped_out" from="whitefield" to="whitefield_ped" priority="-1" type="pedestrian">
+        <lane id="whitefield_ped_out_0" index="0" speed="1.4" length="100.0" width="2.0" shape="5000.0,1500.0 5000.0,1400.0" />
     </edge>
     
-    <edge id="silk_ped" from="silk_ped_start" to="silk_board" priority="-1" type="pedestrian" allow="pedestrian" width="2.0">
-        <lane id="silk_ped_0" index="0" speed="1.4" length="100.0" width="2.0" shape="8400.0,3200.0 8500.0,3200.0"/>
+    <edge id="silk_ped_in" from="silk_ped" to="silk_board" priority="-1" type="pedestrian">
+        <lane id="silk_ped_in_0" index="0" speed="1.4" length="100.0" width="2.0" shape="8400.0,3200.0 8500.0,3200.0" />
     </edge>
     
-    <edge id="silk_ped_return" from="silk_board" to="silk_ped_start" priority="-1" type="pedestrian" allow="pedestrian" width="2.0">
-        <lane id="silk_ped_return_0" index="0" speed="1.4" length="100.0" width="2.0" shape="8500.0,3200.0 8400.0,3200.0"/>
+    <edge id="silk_ped_out" from="silk_board" to="silk_ped" priority="-1" type="pedestrian">
+        <lane id="silk_ped_out_0" index="0" speed="1.4" length="100.0" width="2.0" shape="8500.0,3200.0 8400.0,3200.0" />
     </edge>
     
     <!-- Junctions -->
-    <junction id="marathalli" type="priority" x="0.00" y="0.00" incLanes="whitefield_to_marathalli_0 whitefield_to_marathalli_1 whitefield_to_marathalli_2" intLanes="" shape="-1.60,1498.13 1.60,1498.13 1.60,-1.60 -1.60,-1.60">
-        <request index="0" response="000" foes="000" cont="0"/>
-        <request index="1" response="000" foes="000" cont="0"/>
-        <request index="2" response="000" foes="000" cont="0"/>
+    <junction id="marathalli" type="priority" x="0.00" y="0.00" incLanes="whitefield_marathalli_0 whitefield_marathalli_1 whitefield_marathalli_2 marathalli_ped_in_0" intLanes=":marathalli_0_0 :marathalli_0_1 :marathalli_0_2" shape="-1.60,-1.44 1.60,1.44 1.60,-1.60 -1.60,1.60">
+        <request index="0" response="000" foes="000" cont="0" />
+        <request index="1" response="000" foes="000" cont="0" />
+        <request index="2" response="000" foes="000" cont="0" />
     </junction>
     
-    <junction id="whitefield" type="priority" x="5000.00" y="1500.00" incLanes="marathalli_to_whitefield_0 marathalli_to_whitefield_1 marathalli_to_whitefield_2 silk_to_whitefield_0 silk_to_whitefield_1 silk_to_whitefield_2" intLanes="" shape="4997.73,1503.01 5002.27,1498.49 5001.07,1495.59 4998.93,1504.41">
-        <request index="0" response="000000" foes="000000" cont="0"/>
-        <request index="1" response="000000" foes="000000" cont="0"/>
-        <request index="2" response="000000" foes="000000" cont="0"/>
-        <request index="3" response="000000" foes="000000" cont="0"/>
-        <request index="4" response="000000" foes="000000" cont="0"/>
-        <request index="5" response="000000" foes="000000" cont="0"/>
+    <junction id="whitefield" type="priority" x="5000.00" y="1500.00" incLanes="marathalli_whitefield_0 marathalli_whitefield_1 marathalli_whitefield_2 silk_whitefield_0 silk_whitefield_1 silk_whitefield_2 whitefield_ped_in_0" intLanes=":whitefield_0_0 :whitefield_0_1 :whitefield_0_2 :whitefield_0_3 :whitefield_0_4 :whitefield_0_5" shape="4997.73,1503.01 5002.27,1498.49 5001.07,1495.59 4998.93,1504.41">
+        <request index="0" response="000000" foes="000000" cont="0" />
+        <request index="1" response="000000" foes="000000" cont="0" />
+        <request index="2" response="000000" foes="000000" cont="0" />
+        <request index="3" response="000000" foes="000000" cont="0" />
+        <request index="4" response="000000" foes="000000" cont="0" />
+        <request index="5" response="000000" foes="000000" cont="0" />
     </junction>
     
-    <junction id="silk_board" type="priority" x="8500.00" y="3200.00" incLanes="whitefield_to_silk_0 whitefield_to_silk_1 whitefield_to_silk_2 etv_to_silk_0 etv_to_silk_1 etv_to_silk_2" intLanes="" shape="8497.93,3204.17 8502.27,3201.43 8501.07,3198.33 8498.93,3201.67">
-        <request index="0" response="000000" foes="000000" cont="0"/>
-        <request index="1" response="000000" foes="000000" cont="0"/>
-        <request index="2" response="000000" foes="000000" cont="0"/>
-        <request index="3" response="000000" foes="000000" cont="0"/>
-        <request index="4" response="000000" foes="000000" cont="0"/>
-        <request index="5" response="000000" foes="000000" cont="0"/>
+    <junction id="silk_board" type="priority" x="8500.00" y="3200.00" incLanes="whitefield_silk_0 whitefield_silk_1 whitefield_silk_2 etv_silk_0 etv_silk_1 etv_silk_2 silk_ped_in_0" intLanes=":silk_board_0_0 :silk_board_0_1 :silk_board_0_2 :silk_board_0_3 :silk_board_0_4 :silk_board_0_5" shape="8497.93,3204.17 8502.27,3201.43 8501.07,3198.33 8498.93,3201.67">
+        <request index="0" response="000000" foes="000000" cont="0" />
+        <request index="1" response="000000" foes="000000" cont="0" />
+        <request index="2" response="000000" foes="000000" cont="0" />
+        <request index="3" response="000000" foes="000000" cont="0" />
+        <request index="4" response="000000" foes="000000" cont="0" />
+        <request index="5" response="000000" foes="000000" cont="0" />
     </junction>
     
-    <junction id="etv" type="priority" x="11000.00" y="4500.00" incLanes="silk_to_etv_0 silk_to_etv_1 silk_to_etv_2" intLanes="" shape="10998.20,4502.30 11001.80,4497.70 10998.20,4497.70 11001.80,4502.30">
-        <request index="0" response="000" foes="000" cont="0"/>
-        <request index="1" response="000" foes="000" cont="0"/>
-        <request index="2" response="000" foes="000" cont="0"/>
+    <junction id="etv_junction" type="priority" x="11000.00" y="4500.00" incLanes="silk_etv_0 silk_etv_1 silk_etv_2" intLanes=":etv_junction_0_0 :etv_junction_0_1 :etv_junction_0_2" shape="10998.20,4502.30 11001.80,4497.70 10998.20,4497.70 11001.80,4502.30">
+        <request index="0" response="000" foes="000" cont="0" />
+        <request index="1" response="000" foes="000" cont="0" />
+        <request index="2" response="000" foes="000" cont="0" />
     </junction>
     
-    <!-- Pedestrian junction endpoints -->
-    <junction id="marathalli_ped_start" type="dead_end" x="-100.0" y="-50.0" incLanes="marathalli_ped_return_0" intLanes=""/>
-    <junction id="whitefield_ped_start" type="dead_end" x="5000.0" y="1400.0" incLanes="whitefield_ped_return_0" intLanes=""/>
-    <junction id="silk_ped_start" type="dead_end" x="8400.0" y="3200.0" incLanes="silk_ped_return_0" intLanes=""/>
+    <!-- Pedestrian endpoints -->
+    <junction id="marathalli_ped" type="dead_end" x="-100.0" y="-50.0" incLanes="marathalli_ped_out_0" intLanes="" shape="-101.0,-51.0 -99.0,-49.0" />
+    <junction id="whitefield_ped" type="dead_end" x="5000.0" y="1400.0" incLanes="whitefield_ped_out_0" intLanes="" shape="4999.0,1399.0 5001.0,1401.0" />
+    <junction id="silk_ped" type="dead_end" x="8400.0" y="3200.0" incLanes="silk_ped_out_0" intLanes="" shape="8399.0,3199.0 8401.0,3201.0" />
 </net>
