@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
     <!-- Vehicle Types for EVs with different battery capacities -->
-    <vType id="ev_40kwh" vClass="electric" emissionClass="Energy/unknown" length="5" minGap="2.5" maxSpeed="20" accel="2" decel="2" sigma="0.5">
+    <vType id="ev_40kwh" vClass="passenger" emissionClass="zero" length="5" minGap="2.5" maxSpeed="20" accel="2" decel="2" sigma="0.5">
         <param key="battery" value="40" />
         <param key="maximumBatteryCapacity" value="40" />
         <param key="consumptionRate" value="0.15" />
     </vType>
     
-    <vType id="ev_50kwh" vClass="electric" emissionClass="Energy/unknown" length="5" minGap="2.5" maxSpeed="20" accel="2" decel="2" sigma="0.5">
+    <vType id="ev_50kwh" vClass="passenger" emissionClass="zero" length="5" minGap="2.5" maxSpeed="20" accel="2" decel="2" sigma="0.5">
         <param key="battery" value="50" />
         <param key="maximumBatteryCapacity" value="50" />
         <param key="consumptionRate" value="0.15" />
     </vType>
     
-    <vType id="ev_55kwh" vClass="electric" emissionClass="Energy/unknown" length="5" minGap="2.5" maxSpeed="20" accel="2" decel="2" sigma="0.5">
+    <vType id="ev_55kwh" vClass="passenger" emissionClass="zero" length="5" minGap="2.5" maxSpeed="20" accel="2" decel="2" sigma="0.5">
         <param key="battery" value="55" />
         <param key="maximumBatteryCapacity" value="55" />
         <param key="consumptionRate" value="0.15" />
     </vType>
     
-    <vType id="ev_60kwh" vClass="electric" emissionClass="Energy/unknown" length="5" minGap="2.5" maxSpeed="20" accel="2" decel="2" sigma="0.5">
+    <vType id="ev_60kwh" vClass="passenger" emissionClass="zero" length="5" minGap="2.5" maxSpeed="20" accel="2" decel="2" sigma="0.5">
         <param key="battery" value="60" />
         <param key="maximumBatteryCapacity" value="60" />
         <param key="consumptionRate" value="0.15" />
     </vType>
     
-    <vType id="ev_75kwh" vClass="electric" emissionClass="Energy/unknown" length="5" minGap="2.5" maxSpeed="20" accel="2" decel="2" sigma="0.5">
+    <vType id="ev_75kwh" vClass="passenger" emissionClass="zero" length="5" minGap="2.5" maxSpeed="20" accel="2" decel="2" sigma="0.5">
         <param key="battery" value="75" />
         <param key="maximumBatteryCapacity" value="75" />
         <param key="consumptionRate" value="0.15" />
     </vType>
     
     <!-- Traffic vehicles (background vehicles) -->
-    <vType id="traffic_car" vClass="passenger" emissionClass="Euro4" length="5" minGap="2.5" maxSpeed="18" accel="2.5" decel="2.5" sigma="0.8" />
+    <vType id="traffic_car" vClass="passenger" emissionClass="HBEFA3/PC_G_EU4" length="5" minGap="2.5" maxSpeed="18" accel="2.5" decel="2.5" sigma="0.8" />
     
     <!-- Pedestrians -->
     <personFlow id="pedestrian_flow" begin="0" end="600" number="15" type="DEFAULT_PEDTYPE">
