@@ -3,11 +3,13 @@
 SUMO EV Simulation: Marathalli to ETV Route
 Simulates 5 electric vehicles with different battery capacities
 Tracks State of Charge (SOC) and Velocity in real-time
+Captures screenshots of the simulation
 """
 
 import os
 import sys
 import csv
+import subprocess
 from datetime import datetime
 from pathlib import Path
 
@@ -24,7 +26,9 @@ import traci
 # Configuration
 SUMO_CONFIG = os.path.join(os.path.dirname(__file__), '..', 'config', 'simulation.sumocfg')
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), '..', 'output')
+SCREENSHOT_DIR = os.path.join(OUTPUT_DIR, 'screenshots')
 SIMULATION_TIME = 600  # 10 minutes
+SCREENSHOT_INTERVAL = 30  # Take screenshot every 30 seconds
 
 # EV Specifications
 EV_SPECS = {
@@ -42,17 +46,21 @@ CONSUMPTION_RATE = 0.15
 class EVSimulation:
     def __init__(self):
         self.output_dir = OUTPUT_DIR
+        self.screenshot_dir = SCREENSHOT_DIR
         self.create_output_directory()
         self.initialize_csv_files()
         self.ev_data = {ev_id: {'soc': specs['initial_soc'], 'energy_consumed': 0.0, 
                                  'distance': 0.0, 'capacity': specs['capacity']}
                        for ev_id, specs in EV_SPECS.items()}
         self.timestep = 0
+        self.screenshot_count = 0
         
     def create_output_directory(self):
         """Create output directory if it doesn't exist"""
         Path(self.output_dir).mkdir(parents=True, exist_ok=True)
+        Path(self.screenshot_dir).mkdir(parents=True, exist_ok=True)
         print(f"[INFO] Output directory: {self.output_dir}")
+        print(f"[INFO] Screenshot directory: {self.screenshot_dir}")
         
     def initialize_csv_files(self):
         """Initialize CSV files for data logging"""
@@ -170,6 +178,22 @@ class EVSimulation:
                     f"{self.ev_data[ev_id]['energy_consumed']:.2f}"
                 ])
     
+    def capture_screenshot(self):
+        """Capture screenshot of the SUMO simulation"""
+        try:
+            time_formatted = self.format_time(self.timestep)
+            filename = f"simulation_t{self.timestep:04d}_{time_formatted.replace(':', '-')}.png"
+            filepath = os.path.join(self.screenshot_dir, filename)
+            
+            # Use SUMO's screenshot command via TraCI
+            traci.gui.screenshot('View #0', filepath)
+            
+            self.screenshot_count += 1
+            print(f"  [SCREENSHOT] Captured: {filename}")
+            
+        except Exception as e:
+            print(f"  [WARNING] Could not capture screenshot: {e}")
+    
     def print_console_output(self, vehicles):
         """Print real-time console output"""
         time_formatted = self.format_time(self.timestep)
@@ -203,13 +227,14 @@ class EVSimulation:
         print("="*120)
         print(f"Start Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"Simulation Duration: {SIMULATION_TIME} seconds (10 minutes)")
+        print(f"Screenshot Interval: Every {SCREENSHOT_INTERVAL} seconds")
         print(f"Output Directory: {self.output_dir}")
         print("="*120 + "\n")
         
         try:
-            # Start SUMO simulation
-            sumo_cmd = ['sumo', '-c', SUMO_CONFIG, '--step-length', '1.0', 
-                       '--no-step-log', '--xml-validation', 'never']
+            # Start SUMO simulation with GUI for screenshots
+            sumo_cmd = ['sumo-gui', '-c', SUMO_CONFIG, '--step-length', '1.0', 
+                       '--no-step-log', '--xml-validation', 'never', '--start']
             
             traci.start(sumo_cmd)
             print("[INFO] SUMO simulation started successfully\n")
@@ -248,12 +273,18 @@ class EVSimulation:
                     # Print console output every 10 seconds
                     if self.timestep % 10 == 0:
                         self.print_console_output(vehicles)
+                    
+                    # Capture screenshot at specified interval
+                    if self.timestep % SCREENSHOT_INTERVAL == 0 and self.timestep > 0:
+                        self.capture_screenshot()
                 
                 # Perform step
                 traci.simulationStep()
             
             # Final output
             self.print_console_output(vehicles)
+            self.capture_screenshot()  # Final screenshot
+            
             print("\n" + "="*120)
             print("[SUCCESS] Simulation completed successfully!")
             print("="*120 + "\n")
@@ -273,6 +304,16 @@ class EVSimulation:
                 if file.endswith('.csv'):
                     file_path = os.path.join(self.output_dir, file)
                     print(f"  - {file} ({os.path.getsize(file_path)} bytes)")
+            
+            print(f"\nScreenshots Captured: {self.screenshot_count}")
+            screenshot_files = [f for f in os.listdir(self.screenshot_dir) if f.endswith('.png')]
+            print(f"Screenshot Files: {len(screenshot_files)}")
+            if screenshot_files:
+                print("  Sample screenshots:")
+                for screenshot in sorted(screenshot_files)[:5]:
+                    print(f"    - {screenshot}")
+                if len(screenshot_files) > 5:
+                    print(f"    ... and {len(screenshot_files) - 5} more")
             
             print("\n" + "="*120 + "\n")
             
