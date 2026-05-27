@@ -31,7 +31,7 @@ import traci
 SUMO_CONFIG = os.path.join(os.path.dirname(__file__), '..', 'config', 'simulation.sumocfg')
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), '..', 'output')
 SCREENSHOT_DIR = os.path.join(OUTPUT_DIR, 'screenshots')
-SIMULATION_TIME = 600  # 10 minutes
+SIMULATION_TIME = 2100  # 35 minutes
 SCREENSHOT_INTERVAL = 30  # Take screenshot every 30 seconds
 
 # EV Specifications
@@ -63,6 +63,9 @@ class EVSimulation:
         self.timestep = 0
         self.screenshot_count = 0
         self.vehicle_positions = {}  # Store vehicle positions for visualization
+        self.max_vehicles = 0
+        self.max_pedestrians = 0
+        self.traffic_speed_samples = []
         
     def create_output_directory(self):
         """Create output directory if it doesn't exist"""
@@ -99,6 +102,13 @@ class EVSimulation:
         with open(energy_file, 'w', newline='') as f:
             writer = csv.writer(f)
             header = ['Timestamp(s)', 'Time(HH:MM:SS)', 'VehicleID', 'Speed(km/h)', 'Distance(km)', 'Energy_Consumed(kWh)']
+            writer.writerow(header)
+            
+        # Traffic Info CSV
+        traffic_file = os.path.join(self.output_dir, 'traffic_info.csv')
+        with open(traffic_file, 'w', newline='') as f:
+            writer = csv.writer(f)
+            header = ['Timestamp(s)', 'Time(HH:MM:SS)', 'Total_Vehicles', 'EV_Count', 'Background_Traffic_Count', 'Avg_Background_Speed(km/h)', 'Active_Pedestrians']
             writer.writerow(header)
     
     def format_time(self, seconds):
@@ -143,9 +153,9 @@ class EVSimulation:
         for ev_id in EV_SPECS.keys():
             if ev_id in vehicles:
                 soc = self.ev_data[ev_id]['soc']
-                speed = vehicles[ev_id]['speed']
+                speed_kmh = vehicles[ev_id]['speed'] * 3.6
                 soc_row.append(f"{soc:.2f}")
-                vel_row.append(f"{speed:.2f}")
+                vel_row.append(f"{speed_kmh:.2f}")
             else:
                 soc_row.append("N/A")
                 vel_row.append("N/A")
@@ -186,6 +196,23 @@ class EVSimulation:
                     f"{self.ev_data[ev_id]['distance']:.2f}",
                     f"{self.ev_data[ev_id]['energy_consumed']:.2f}"
                 ])
+                
+    def log_traffic_info(self, total_vehicles, ev_count, bg_count, avg_bg_speed, active_pedestrians):
+        """Log general traffic and pedestrian metrics to CSV"""
+        traffic_file = os.path.join(self.output_dir, 'traffic_info.csv')
+        time_formatted = self.format_time(self.timestep)
+        
+        with open(traffic_file, 'a', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                self.timestep,
+                time_formatted,
+                total_vehicles,
+                ev_count,
+                bg_count,
+                f"{avg_bg_speed:.2f}",
+                active_pedestrians
+            ])
     
     def draw_car_symbol(self, ax, x, y, angle, color, label):
         """Draw a car symbol at position (x, y) with given angle and color"""
@@ -196,17 +223,21 @@ class EVSimulation:
         # Convert angle to radians (SUMO uses degrees)
         angle_rad = np.radians(angle)
         
+        # Rotate the patch using an Affine transform
+        import matplotlib.transforms as mtransforms
+        t = mtransforms.Affine2D().rotate_deg_around(x, y, angle) + ax.transData
+        
         # Car body (rectangle)
         car_body = FancyBboxPatch(
             (x - car_length/2, y - car_width/2),
             car_length,
             car_width,
             boxstyle="round,pad=15",
-            angle=angle,
             facecolor=color,
             edgecolor='black',
             linewidth=2,
-            alpha=0.8
+            alpha=0.8,
+            transform=t
         )
         ax.add_patch(car_body)
         
@@ -376,21 +407,37 @@ class EVSimulation:
         try:
             # Start SUMO simulation (headless for screenshot capture)
             sumo_cmd = ['sumo', '-c', SUMO_CONFIG, '--step-length', '1.0', 
-                       '--no-step-log', '--xml-validation', 'never', '--no-warnings']
+                       '--no-step-log', '--xml-validation', 'never']
             
             traci.start(sumo_cmd)
             print("[INFO] SUMO simulation started successfully\n")
             
             # Simulation loop
+            vehicles = {}
             while traci.simulation.getTime() < SIMULATION_TIME:
                 self.timestep = int(traci.simulation.getTime())
                 
                 # Get active vehicles
                 vehicle_ids = traci.vehicle.getIDList()
+                total_vehicles = len(vehicle_ids)
+                self.max_vehicles = max(self.max_vehicles, total_vehicles)
+                
+                # Get active pedestrians
+                try:
+                    person_ids = traci.person.getIDList()
+                    active_pedestrians = len(person_ids)
+                except traci.TraCIException:
+                    active_pedestrians = 0
+                self.max_pedestrians = max(self.max_pedestrians, active_pedestrians)
+                
                 vehicles = {}
+                bg_speeds = []
+                bg_count = 0
+                ev_count = 0
                 
                 for vehicle_id in vehicle_ids:
                     if vehicle_id in EV_SPECS:
+                        ev_count += 1
                         try:
                             speed = traci.vehicle.getSpeed(vehicle_id)
                             x, y = traci.vehicle.getPosition(vehicle_id)
@@ -407,8 +454,22 @@ class EVSimulation:
                             }
                         except traci.TraCIException:
                             continue
+                    else:
+                        bg_count += 1
+                        try:
+                            bg_speed = traci.vehicle.getSpeed(vehicle_id)
+                            bg_speeds.append(bg_speed)
+                        except traci.TraCIException:
+                            continue
                 
-                # Log data every second
+                avg_bg_speed_kmh = (sum(bg_speeds) / len(bg_speeds)) * 3.6 if bg_speeds else 0.0
+                if bg_speeds:
+                    self.traffic_speed_samples.append(avg_bg_speed_kmh)
+                
+                # Log traffic info every second
+                self.log_traffic_info(total_vehicles, ev_count, bg_count, avg_bg_speed_kmh, active_pedestrians)
+                
+                # Log EV data every second
                 if vehicles:
                     self.log_soc_and_velocity(vehicles)
                     self.log_position(vehicles)
@@ -426,15 +487,16 @@ class EVSimulation:
                 traci.simulationStep()
             
             # Final output and screenshot
-            self.print_console_output(vehicles)
-            self.capture_colored_screenshot(vehicles)
+            if vehicles:
+                self.print_console_output(vehicles)
+                self.capture_colored_screenshot(vehicles)
             
             print("\n" + "="*120)
             print("[SUCCESS] Simulation completed successfully!")
             print("="*120 + "\n")
             
             # Summary
-            print("\nFINAL SUMMARY:")
+            print("\nFINAL EV SUMMARY:")
             print("-" * 120)
             for ev_id, specs in EV_SPECS.items():
                 soc = self.ev_data[ev_id]['soc']
@@ -443,8 +505,15 @@ class EVSimulation:
                 remaining_energy = (soc / 100) * specs['capacity']
                 print(f"{ev_id}: Distance: {distance:.2f}km | Energy Consumed: {energy_consumed:.2f}kWh | Final SOC: {soc:.2f}% | Remaining Energy: {remaining_energy:.2f}kWh")
             
+            print("\nTRAFFIC & PEDESTRIAN SUMMARY:")
+            print("-" * 120)
+            avg_traffic_speed_overall = sum(self.traffic_speed_samples) / len(self.traffic_speed_samples) if self.traffic_speed_samples else 0.0
+            print(f"Peak Congestion (Max Active Vehicles): {self.max_vehicles}")
+            print(f"Peak Pedestrian Count: {self.max_pedestrians}")
+            print(f"Overall Average Background Traffic Speed: {avg_traffic_speed_overall:.2f} km/h")
+            
             print("\nOutput Files Generated:")
-            for file in os.listdir(self.output_dir):
+            for file in sorted(os.listdir(self.output_dir)):
                 if file.endswith('.csv'):
                     file_path = os.path.join(self.output_dir, file)
                     print(f"  - {file} ({os.path.getsize(file_path)} bytes)")

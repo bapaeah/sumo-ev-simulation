@@ -11,7 +11,7 @@ echo "Generating SUMO network..."
 cd "$(dirname "$0")"
 
 # Run netconvert to generate the network file
-$SUMO_HOME/bin/netconvert -c generate_network.netcfg --no-turnarounds
+$SUMO_HOME/bin/netconvert -c generate_network.netcfg
 
 if [ $? -eq 0 ]; then
     echo "Network generated successfully: marathalli_etv.net.xml"
