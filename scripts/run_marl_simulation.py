@@ -201,5 +201,82 @@ def main():
         print(f"{ev_id:<10} | {init_soc:<15.1f}% | {def_soc:<18.2f}% | {marl_soc:<18.2f}%")
     print("="*80 + "\n")
 
+    # ----------------------------------------------------
+    # AUTOMATED POST-PROCESSING & REPORT/PLOT GENERATION
+    # ----------------------------------------------------
+    print("\n" + "="*80)
+    print("      POST-PROCESSING: AUTOMATIC REPORT & PLOT GENERATION")
+    print("="*80)
+    
+    generators = [
+        ("Comparative CSV Report Tables", "generate_marl_comparison_csv", "generate_reports"),
+        ("6-Panel Global Comparison Plot", "plot_marl_comparison", "generate_comparison_plots"),
+        ("Individual EV Comparison Plots", "plot_individual_marl_comparison", "generate_individual_comparison_plots"),
+        ("2x5 Master Grid Performance Plot", "plot_marl_4x5_grid", "generate_grid_plot"),
+        ("Macro Traffic Info Analysis Plots", "plot_traffic_info", "generate_traffic_plots"),
+        ("1-Minute Density vs. Speed Plot", "plot_traffic_density_speed", "generate_density_speed_plot"),
+        ("EV1 Traffic Level Comparative Plots", "plot_ev01_traffic_levels", "generate_comparisons"),
+        ("3x5 Step Reward Comparative Plot", "plot_ev_rewards_direct", "generate_direct_comparison"),
+        ("1x5 Reward Congestion Overlay Plot", "plot_marl_rewards_comparison", "generate_rewards_comparison"),
+        ("1x5 Continuous Optimised Reward Plot", "plot_marl_rewards_whole_journey", "generate_rewards_whole_journey"),
+        ("1x5 Continuous Reward Comparison Plot", "plot_ev_rewards_whole_journey", "generate_rewards_whole_journey_comparison"),
+        ("Publication-Grade Word Documentation", "generate_reward_docx", "main")
+    ]
+    
+    for label, module_name, func_name in generators:
+        print(f"[INFO] Generating {label}...")
+        try:
+            # Dynamically import the module
+            module = __import__(module_name)
+            # Fetch the function
+            func = getattr(module, func_name)
+            # Execute
+            func()
+            print(f"[SUCCESS] {label} generated successfully!")
+        except Exception as e:
+            print(f"[ERROR] Failed to generate {label}: {e}")
+            import traceback
+            traceback.print_exc()
+            
+    # Automatically copy generated files to the active conversation artifacts directory
+    brain_dir = "/Users/bappi/.gemini/antigravity/brain/40370f9f-ec39-4ac9-a1e3-bc75cca279e3"
+    if os.path.exists(brain_dir):
+        print(f"\n[INFO] Syncing output files to active conversation artifacts...")
+        import shutil
+        files_to_sync = [
+            'marl_soc_comparison_report.csv',
+            'marl_energy_comparison_report.csv',
+            'MARL_Reward_Function_Documentation.docx',
+            'traffic_info_plots.png',
+            'traffic_density_speed_comparison.png',
+            'ev01_low_traffic_comparison.png',
+            'ev01_medium_traffic_comparison.png',
+            'ev01_heavy_traffic_comparison.png',
+            'ev_rewards_direct_comparison.png',
+            'marl_rewards_levels_comparison.png',
+            'marl_rewards_whole_journey.png',
+            'ev_rewards_whole_journey_comparison.png',
+            'marl_comparison.png',
+            'marl_4x5_grid_comparison.png',
+            'ev_01_marl_comparison.png',
+            'ev_02_marl_comparison.png',
+            'ev_03_marl_comparison.png',
+            'ev_04_marl_comparison.png',
+            'ev_05_marl_comparison.png'
+        ]
+        for f in files_to_sync:
+            src = os.path.join(OUTPUT_DIR, f)
+            dst = os.path.join(brain_dir, f)
+            if os.path.exists(src):
+                try:
+                    shutil.copy2(src, dst)
+                    print(f"  - Synced: {f}")
+                except Exception as sync_e:
+                    print(f"  - Failed to sync {f}: {sync_e}")
+            
+    print("\n" + "="*80)
+    print("           ALL SCRIPT OUTPUTS GENERATED AND AGGREGATED!")
+    print("="*80 + "\n")
+
 if __name__ == '__main__':
     main()

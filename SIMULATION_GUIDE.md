@@ -146,6 +146,11 @@ All files are located within the active workspace `/Users/bappi/.gemini/antigrav
 *   **`scripts/plot_traffic_info.py`**: Parses the traffic log to generate a 3-panel visual overview of network vehicle density, average speed flows, and pedestrian crossings.
 *   **`scripts/plot_traffic_density_speed.py`**: Generates a premium 1-minute visual volume vs. speed comparison plot for low, medium, and heavy traffic states.
 *   **`scripts/plot_ev01_traffic_levels.py`**: Compiles comparative 1-minute plots for EV1 over low, medium, and heavy traffic states, showcasing Actual vs. Optimised Speed, SOC, and Energy.
+*   **`scripts/plot_ev_rewards_direct.py`**: Compiles the ultimate 3x5 grid overlay comparison of RL reward functions (Actual vs. Optimised) for all 5 EVs side-by-side.
+*   **`scripts/plot_marl_rewards_comparison.py`**: Compiles the comparative 1-minute plots overlaying Low, Medium, and Heavy traffic optimised rewards for each of the 5 EVs.
+*   **`scripts/plot_marl_rewards_whole_journey.py`**: Generates a continuous 1-minute rolling average plot for the optimised RL step rewards across the entire 35-minute journey for all 5 EVs.
+*   **`scripts/plot_ev_rewards_whole_journey.py`**: Generates a highly-detailed 1x5 grid plot comparing Actual vs. Optimised step rewards over the whole 35-minute journey for all 5 EVs.
+*   **`scripts/generate_reward_docx.py`**: Generates a highly professional Word document (`.docx`) detailing the reward functions, tractive physics models, and parameters.
 *   **`scripts/generate_marl_comparison_csv.py`**: Reads the final raw logs to compile the comparative SOC and Energy spreadsheets.
 
 ---
@@ -160,10 +165,17 @@ All outputs are written to the workspace `output/` directory:
 *   **`marl_soc_comparison_report.csv`**: A clean comparative spreadsheet showing Initial SOC, Final SOC without MARL, Final SOC with MARL, and absolute SOC saved.
 *   **`marl_energy_comparison_report.csv`**: A clean comparative spreadsheet showing Battery Capacity, Energy consumed without MARL, Energy consumed with MARL, absolute Energy saved, and efficiency gains (%).
 
+### Professional Word Reports
+*   **`MARL_Reward_Function_Documentation.docx`**: A publication-grade Word document detailing the full mathematical formulation, physics-based factors, ACC parameters, and shockwave damping analysis.
+
 ### High-Resolution Visual Graphics
 *   `traffic_info_plots.png`: 3-panel macro traffic analysis sheet.
 *   `traffic_density_speed_comparison.png`: 1-minute visual volume vs. speed comparison plot for low, medium, and heavy traffic states.
 *   `ev01_*_traffic_comparison.png`: Dedicated 1-minute comparative plots for EV1 (Velocity, SOC, Energy) under Low, Medium, and Heavy traffic.
+*   `ev_rewards_direct_comparison.png`: 3x5 grid comparison plot directly overlaying Actual vs. Optimised RL reward profiles for all 5 EVs.
+*   `marl_rewards_levels_comparison.png`: 1x5 grid comparison plot overlaying Low, Medium, and Heavy traffic optimised reward curves for all 5 EVs.
+*   `marl_rewards_whole_journey.png`: 1x5 grid comparison plot illustrating continuous optimised rewards with rolling averages and shaded traffic phases across the 35-minute journey.
+*   **`ev_rewards_whole_journey_comparison.png`**: 1x5 grid comparison plot directly comparing Actual vs. Optimised step rewards with 30s rolling averages and shaded traffic phases over the entire 35-minute journey.
 *   `marl_comparison.png`: 6-panel side-by-side global comparative chart.
 *   `ev_*_marl_comparison.png`: Dedicated 3-panel comparison sheets for each EV individually.
 *   `marl_4x5_grid_comparison.png`: The comprehensive 10-subplot (2x5) master comparative grid sheet.
@@ -182,32 +194,29 @@ source venv/bin/activate
 export SUMO_HOME=/Users/bappi/sumo
 ```
 
-### Step 2: Execute the Simulation Runs
-Run the comparative simulation execution runner. This will execute both default and optimized runs sequentially for 35 minutes of simulation time, and print the final analytical reports directly to the console:
+### Step 2: Execute the Simulation, Analytical Reports, and Plots
+Run the comparative simulation execution runner. This single command will run both standard and optimized configurations sequentially, print console reports, and then **automatically trigger all post-processing generators** (compiling all CSV spreadsheets, high-resolution visual comparison plots, and the publication-grade Word documentation) and sync them immediately:
 ```bash
 python3 scripts/run_marl_simulation.py
 ```
 
-### Step 3: Compile Comparative CSV Spreadsheet Reports
-Compile the final comparative numerical data into separate, clean spreadsheet tables for SOC and Energy consumption:
+### Step 3: Optional Manual Regeneration (If Needed)
+If you modify any plotting logic or want to regenerate specific outputs individually without re-running the entire 35-minute simulation, you can run any individual script manually:
 ```bash
+# 1. Regenerate comparative CSV report tables
 python3 scripts/generate_marl_comparison_csv.py
-```
 
-### Step 4: Generate All Analytical & Visual Plots
-Execute the respective plotting scripts to compile all of the visual charts, carousels, and grid maps:
-```bash
-# 1. Generate the 6-panel global comparative plot
+# 2. Regenerate the 6-panel global comparative plot
 python3 scripts/plot_marl_comparison.py
 
-# 2. Generate the 3-panel comparative plot for each EV separately
+# 3. Regenerate the individual EV comparative sheets
 python3 scripts/plot_individual_marl_comparison.py
 
-# 3. Generate the 2x5 comprehensive grid comparative plot
+# 4. Regenerate the 2x5 master grid comparative sheet
 python3 scripts/plot_marl_4x5_grid.py
 
-# 4. Generate the traffic & pedestrian environment analysis plots
-python3 scripts/plot_traffic_info.py
+# 5. Regenerate the publication-grade Word documentation
+python3 scripts/generate_reward_docx.py
 ```
 
-All compiled CSV and PNG assets will be available inside the `output/` directory for direct ingestion!
+All compiled CSV, Word, and PNG assets will be automatically placed in the `output/` directory and synced to your conversation folder!

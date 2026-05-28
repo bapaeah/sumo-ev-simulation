@@ -51,43 +51,40 @@ def plot_traffic_level_comparison(title, start_t, end_t, save_path, data_dict):
     
     # Enable premium styling
     plt.rcParams.update({
-        'font.size': 11,
-        'axes.labelsize': 13,
-        'xtick.labelsize': 11,
-        'ytick.labelsize': 11,
-        'legend.fontsize': 10,
-        'figure.titlesize': 15
+        'font.size': 14,
+        'axes.labelsize': 18,
+        'xtick.labelsize': 16,
+        'ytick.labelsize': 16,
+        'legend.fontsize': 11
     })
     
-    fig, (ax_traffic, ax_speed, ax_soc, ax_energy) = plt.subplots(4, 1, figsize=(10, 14), sharex=True, dpi=150)
+    fig, (ax_traffic, ax_speed, ax_soc, ax_energy) = plt.subplots(4, 1, figsize=(10, 12), sharex=True, dpi=150)
     
     # 1. SURROUNDING TRAFFIC VOL (Context)
-    ax_traffic.plot(time_sec, data_dict['traffic'][:60], color=COLOR_TRAFFIC, linewidth=2.5, label='Surrounding Vehicles')
-    ax_traffic.set_ylabel("Traffic Count", fontsize=12, fontweight='bold')
-    ax_traffic.set_title("Surrounding Traffic Volume (All Active Vehicles)", fontsize=12, fontweight='bold', pad=6)
+    ax_traffic.plot(time_sec, data_dict['traffic'][:60], color=COLOR_TRAFFIC, linewidth=2.5)
+    ax_traffic.set_ylabel("Traffic Count", fontsize=18, fontweight='bold')
     ax_traffic.grid(True, linestyle='--', alpha=0.5)
-    ax_traffic.legend(loc='upper right', framealpha=0.9)
+    ax_traffic.tick_params(axis='both', which='major', labelsize=16)
     # Put tight bounds with some padding
     min_t = data_dict['traffic'].min()
     max_t = data_dict['traffic'].max()
     ax_traffic.set_ylim(max(0, min_t - 10), max_t + 10)
     
-    # 2. SPEED SUBPLOT
+    # 2. SPEED SUBPLOT (Legend kept here!)
     ax_speed.plot(time_sec, data_dict['vel_def'][:60], color=COLOR_DEFAULT, linewidth=2.5, label='Actual (Default)')
     ax_speed.plot(time_sec, data_dict['vel_marl'][:60], color=COLOR_MARL, linewidth=2.5, label='Optimised (MARL)')
-    ax_speed.set_ylabel("Speed (km/h)", fontsize=12, fontweight='bold')
-    ax_speed.set_title("EV1 Velocity Profile Comparison", fontsize=12, fontweight='bold', pad=6)
+    ax_speed.set_ylabel("Speed (km/h)", fontsize=18, fontweight='bold')
     ax_speed.grid(True, linestyle='--', alpha=0.5)
-    ax_speed.legend(loc='upper right', framealpha=0.9)
+    ax_speed.legend(loc='upper right', framealpha=0.9, fontsize=11)
+    ax_speed.tick_params(axis='both', which='major', labelsize=16)
     ax_speed.set_ylim(-2, 75)
     
     # 3. STATE OF CHARGE (SOC) SUBPLOT
-    ax_soc.plot(time_sec, data_dict['soc_def'][:60], color=COLOR_DEFAULT, linewidth=2.5, label='Actual')
-    ax_soc.plot(time_sec, data_dict['soc_marl'][:60], color=COLOR_MARL, linewidth=2.5, label='Optimised')
-    ax_soc.set_ylabel("State of Charge (%)", fontsize=12, fontweight='bold')
-    ax_soc.set_title("EV1 State of Charge (SOC %) Depletion", fontsize=12, fontweight='bold', pad=6)
+    ax_soc.plot(time_sec, data_dict['soc_def'][:60], color=COLOR_DEFAULT, linewidth=2.5)
+    ax_soc.plot(time_sec, data_dict['soc_marl'][:60], color=COLOR_MARL, linewidth=2.5)
+    ax_soc.set_ylabel("SoC (%)", fontsize=18, fontweight='bold')
     ax_soc.grid(True, linestyle='--', alpha=0.5)
-    ax_soc.legend(loc='upper right', framealpha=0.9)
+    ax_soc.tick_params(axis='both', which='major', labelsize=16)
     
     # Zoom tightly to SOC range to eliminate whitespace
     min_soc = min(data_dict['soc_def'].min(), data_dict['soc_marl'].min())
@@ -95,23 +92,19 @@ def plot_traffic_level_comparison(title, start_t, end_t, save_path, data_dict):
     ax_soc.set_ylim(min_soc - 0.05, max_soc + 0.05)
     
     # 4. ENERGY SUBPLOT
-    ax_energy.plot(time_sec, data_dict['energy_def'][:60], color=COLOR_DEFAULT, linewidth=2.5, label='Actual')
-    ax_energy.plot(time_sec, data_dict['energy_marl'][:60], color=COLOR_MARL, linewidth=2.5, label='Optimised')
-    ax_energy.set_ylabel("Energy Consumed (kWh)", fontsize=12, fontweight='bold')
-    ax_energy.set_xlabel("Time (seconds)", fontsize=12, fontweight='bold')
-    ax_energy.set_title("EV1 Cumulative Energy Consumption", fontsize=12, fontweight='bold', pad=6)
+    ax_energy.plot(time_sec, data_dict['energy_def'][:60], color=COLOR_DEFAULT, linewidth=2.5)
+    ax_energy.plot(time_sec, data_dict['energy_marl'][:60], color=COLOR_MARL, linewidth=2.5)
+    ax_energy.set_ylabel("Energy Consumed (kWh)", fontsize=18, fontweight='bold')
+    ax_energy.set_xlabel("Time (seconds)", fontsize=18, fontweight='bold')
     ax_energy.grid(True, linestyle='--', alpha=0.5)
-    ax_energy.legend(loc='upper left', framealpha=0.9)
+    ax_energy.tick_params(axis='both', which='major', labelsize=16)
     
     # Zoom tightly to Energy consumption
     min_energy = min(data_dict['energy_def'].min(), data_dict['energy_marl'].min())
     max_energy = max(data_dict['energy_def'].max(), data_dict['energy_marl'].max())
     ax_energy.set_ylim(min_energy - 0.01, max_energy + 0.01)
     
-    plt.suptitle(f"EV1 Performance Profile: {title} Conditions\n1-Minute Detailed Window Comparison (Actual vs. Optimised)", 
-                 fontsize=14, fontweight='bold', y=0.97)
-    
-    plt.tight_layout(rect=[0, 0.02, 1, 0.94])
+    plt.tight_layout(pad=1.2)
     plt.savefig(save_path, bbox_inches='tight')
     plt.close()
     print(f"[SUCCESS] Saved comparative plot for {title} to: {save_path}")
